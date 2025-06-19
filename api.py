@@ -1,55 +1,63 @@
 import requests
-from config import FOOTBALL_API_KEY, COMPETITION_PL, COMPETITION_CHAMP, PL_SEASONS, CHAMP_SEASONS
+from config import HEADERS, COMPETITIONS
 
-HEADERS = {"X-Auth-Token": FOOTBALL_API_KEY}
-
-
-def fetch_matches(competition: str, season: int, status: str = "FINISHED"):
+def fetch_standings(comp_code, season):
     """
-    Fetch matches for a given competition and season with the specified status.
+    Fetch standings for a given competition code and season.
+    Returns a list of table rows or None if forbidden.
     """
-    url = f"https://api.football-data.org/v4/competitions/{competition}/matches?season={season}&status={status}"
+    url = f"https://api.football-data.org/v4/competitions/{comp_code}/standings?season={season}"
     res = requests.get(url, headers=HEADERS, timeout=15)
-    res.raise_for_status()
-    return res.json().get("matches", [])
-
-
-def fetch_standings(competition: str, season: int):
-    """
-    Fetch final standings for a competition season.
-    """
-    url = f"https://api.football-data.org/v4/competitions/{competition}/standings?season={season}"
-    res = requests.get(url, headers=HEADERS, timeout=15)
+    if res.status_code == 403:
+        print(f"⚠️ 403 forbidden fetching {comp_code} {season}; skipping.")
+        return None
     res.raise_for_status()
     data = res.json()
-    return data.get("standings", [])[0].get("table", [])
+    # "standings" is a list of groups; each has a "table" key
+    rows = []
+    for group in data.get("standings", []):
+        rows.extend(group.get("table", []))
+    return rows
 
-
-def get_promoted_teams():
+def fetch_all_data(seasons):
     """
-    Identify teams promoted from Championship to PL for configured seasons.
-    Returns a set of team IDs.
+    Fetch and flatten standings from all configured competitions/seasons.
+    Returns a list of dicts, each with added 'competition' and 'season' keys.
     """
-    promoted = set()
-    for year in CHAMP_SEASONS:
-        table = fetch_standings(COMPETITION_CHAMP, year)
-        for row in table[:3]:
-            promoted.add(row["team"]["id"])
-    return promoted
+    all_rows = []
+    for season in seasons:
+        for code in COMPETITIONS:
+            table = fetch_standings(code, season)
+            if not table:
+                continue
+            for row in table:
+                row['competition'] = code
+                row['season'] = season
+                all_rows.append(row)
+    return all_rows
 
-
-def fetch_all_data():
+def fetch_upcoming_fixtures(limit=10):
     """
-    Fetch and return raw match data for PL and relevant Championship matches.
+    Fetch scheduled (future) fixtures across all competitions,
+    merge & sort by match date, then return up to `limit` matches.
     """
-    pl_matches = []
-    for year in PL_SEASONS:
-        pl_matches.extend(fetch_matches(COMPETITION_PL, year, status="FINISHED"))
+    fixtures = []
+    for comp_code in COMPETITIONS:
+        url = f"https://api.football-data.org/v4/competitions/{comp_code}/matches?status=SCHEDULED"
+        res = requests.get(url, headers=HEADERS, timeout=15)
+        if res.status_code != 200:
+            print(f"⚠️ Unable to fetch fixtures for {comp_code}: HTTP {res.status_code}")
+            continue
+        data = res.json()
+        for m in data.get("matches", []):
+            fixtures.append({
+                "date": m["utcDate"],
+                "competition": comp_code,
+                "home": m["homeTeam"]["name"],
+                "away": m["awayTeam"]["name"]
+            })
 
-    promoted = get_promoted_teams()
-    champ_matches = []
-    for year in CHAMP_SEASONS:
-        matches = fetch_matches(COMPETITION_CHAMP, year, status="FINISHED")
-        champ_matches.extend([m for m in matches if m["homeTeam"]["id"] in promoted or m["awayTeam"]["id"] in promoted])
+    # sort by date ascending
+    fixtures.sort(key=lambda x: x["date"])
+    return fixtures[:limit]
 
-    return pl_matches + champ_matches

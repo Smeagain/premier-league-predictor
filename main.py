@@ -1,22 +1,18 @@
-import argparse
 from model import train_model, predict
-from config import DEFAULT_PREDICT_LIMIT
-
+import argparse
 
 def main():
-    parser = argparse.ArgumentParser(description="Premier League Predictor CLI")
-    parser.add_argument("--train", action="store_true", help="Train a new model")
-    parser.add_argument("--predict", action="store_true", help="Predict upcoming matches")
-    parser.add_argument("--limit", type=int, default=DEFAULT_PREDICT_LIMIT,
-                        help="Number of fixtures to predict")
-    parser.add_argument("--json", action="store_true", help="Output predictions as JSON")
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--train', action='store_true')
+    parser.add_argument('--predict', action='store_true')
+    parser.add_argument('--limit', type=int, default=10)
     args = parser.parse_args()
 
     if args.train:
         train_model()
     if args.predict:
-        predict(limit=args.limit, as_json=args.json)
+        predict(limit=args.limit)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
+
