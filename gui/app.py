@@ -52,8 +52,13 @@ class App(tk.Tk):
         self.output.delete('1.0', tk.END)
         results = predict(limit=limit)
         for r in results:
-            line = f"{r['date']} {r['home']} vs {r['away']}: {r['prob']['home_win']*100:.1f}% / {r['prob']['draw']*100:.1f}% / {r['prob']['away_win']*100:.1f}%\n"
+            line = (
+                f"{r['date']} {r['home']} vs {r['away']}: "
+                f"{r['prob']['home_win']*100:.1f}% / {r['prob']['draw']*100:.1f}% / "
+                f"{r['prob']['away_win']*100:.1f}%\n"
+            )
             self.output.insert(tk.END, line)
+
 
 if __name__ == "__main__":
     App().mainloop()

@@ -50,7 +50,6 @@ def predict(limit=10):
     """
     Load the latest model, fetch upcoming fixtures, and list them with dates.
     """
-    model = load_latest_model()
 
     fixtures = fetch_upcoming_fixtures(limit=limit)
     if not fixtures:

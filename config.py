@@ -18,4 +18,3 @@ COMPETITIONS = {
 
 MODEL_DIR = "models"
 MODEL_NAME_TEMPLATE = "model_{timestamp}.pkl"
-
