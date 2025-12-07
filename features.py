@@ -17,10 +17,7 @@ def build_features(matches: list) -> pd.DataFrame:
         score = m['score']['fullTime']
         label = None
         if score['home'] is not None and score['away'] is not None:
-            label = (
-                0 if score['home'] > score['away'] else
-                (1 if score['home'] == score['away'] else 2)
-            )
+            label = 0 if score['home'] > score['away'] else (1 if score['home'] == score['away'] else 2)
 
         recent.setdefault(home_id, deque(maxlen=RECENT_FORM_N))
         recent.setdefault(away_id, deque(maxlen=RECENT_FORM_N))
@@ -51,7 +48,7 @@ def build_features(matches: list) -> pd.DataFrame:
 
         if label is not None:
             recent[home_id].append(label)
-            # Invert outcome for away team (2 - label)
+            # Invert the outcome for the away team: home win(0)->away loss(2), draw(1)->draw(1), away win(2)->away win(0)
             recent[away_id].append(2 - label)
 
     return pd.DataFrame(records)
