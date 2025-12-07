@@ -21,7 +21,9 @@ def fetch_standings(comp_code, season):
     rows = []
     for group in data.get("standings", []):
         rows.extend(group.get("table", []))
+
     return rows
+
 
 def fetch_all_data(seasons):
     """
