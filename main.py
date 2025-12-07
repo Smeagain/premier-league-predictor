@@ -1,6 +1,7 @@
 from model import train_model, predict
 import argparse
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--train', action='store_true')
@@ -13,6 +14,6 @@ def main():
     if args.predict:
         predict(limit=args.limit)
 
+
 if __name__ == '__main__':
     main()
-

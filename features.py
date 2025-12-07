@@ -1,4 +1,3 @@
-from datetime import datetime
 import pandas as pd
 from collections import deque
 from config import RECENT_FORM_N
@@ -16,7 +15,12 @@ def build_features(matches: list) -> pd.DataFrame:
         home_id = m['homeTeam']['id']
         away_id = m['awayTeam']['id']
         score = m['score']['fullTime']
-        label = 0 if score['home'] > score['away'] else (1 if score['home'] == score['away'] else 2)
+        label = None
+        if score['home'] is not None and score['away'] is not None:
+            label = (
+                0 if score['home'] > score['away'] else
+                (1 if score['home'] == score['away'] else 2)
+            )
 
         recent.setdefault(home_id, deque(maxlen=RECENT_FORM_N))
         recent.setdefault(away_id, deque(maxlen=RECENT_FORM_N))
@@ -45,7 +49,9 @@ def build_features(matches: list) -> pd.DataFrame:
             'label': label
         })
 
-        recent[home_id].append(label)
-        recent[away_id].append(2 if label == 2 else (1 if label == 1 else 0))
+        if label is not None:
+            recent[home_id].append(label)
+            # Invert outcome for away team (2 - label)
+            recent[away_id].append(2 - label)
 
     return pd.DataFrame(records)

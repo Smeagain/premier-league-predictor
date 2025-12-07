@@ -1,12 +1,16 @@
 import requests
 from config import HEADERS, COMPETITIONS
 
+
 def fetch_standings(comp_code, season):
     """
     Fetch standings for a given competition code and season.
     Returns a list of table rows or None if forbidden.
     """
-    url = f"https://api.football-data.org/v4/competitions/{comp_code}/standings?season={season}"
+    url = (
+        f"https://api.football-data.org/v4/competitions/{comp_code}/standings"
+        f"?season={season}"
+    )
     res = requests.get(url, headers=HEADERS, timeout=15)
     if res.status_code == 403:
         print(f"⚠️ 403 forbidden fetching {comp_code} {season}; skipping.")
@@ -17,7 +21,9 @@ def fetch_standings(comp_code, season):
     rows = []
     for group in data.get("standings", []):
         rows.extend(group.get("table", []))
+
     return rows
+
 
 def fetch_all_data(seasons):
     """
@@ -34,7 +40,9 @@ def fetch_all_data(seasons):
                 row['competition'] = code
                 row['season'] = season
                 all_rows.append(row)
+
     return all_rows
+
 
 def fetch_upcoming_fixtures(limit=10):
     """
@@ -43,10 +51,13 @@ def fetch_upcoming_fixtures(limit=10):
     """
     fixtures = []
     for comp_code in COMPETITIONS:
-        url = f"https://api.football-data.org/v4/competitions/{comp_code}/matches?status=SCHEDULED"
+        url = (
+            f"https://api.football-data.org/v4/competitions/{comp_code}/matches"
+            f"?status=SCHEDULED"
+        )
         res = requests.get(url, headers=HEADERS, timeout=15)
         if res.status_code != 200:
-            print(f"⚠️ Unable to fetch fixtures for {comp_code}: HTTP {res.status_code}")
+            print(f"⚠️ Unable to fetch fixtures for {comp_code}: {res.status_code}")
             continue
         data = res.json()
         for m in data.get("matches", []):
@@ -60,4 +71,3 @@ def fetch_upcoming_fixtures(limit=10):
     # sort by date ascending
     fixtures.sort(key=lambda x: x["date"])
     return fixtures[:limit]
-
