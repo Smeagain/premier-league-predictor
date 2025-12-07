@@ -5,6 +5,7 @@ import threading
 from model import train_model, predict
 from config import DEFAULT_PREDICT_LIMIT
 
+
 class App(tk.Tk):
     def __init__(self):
         super().__init__()

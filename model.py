@@ -6,6 +6,7 @@ from config import MODEL_DIR, MODEL_NAME_TEMPLATE, COMPETITIONS
 from api import fetch_all_data, fetch_upcoming_fixtures
 from sklearn.ensemble import RandomForestClassifier
 
+
 def prepare_features(rows):
     """
     Convert list of standings rows into feature matrix X and target vector y.
@@ -17,12 +18,14 @@ def prepare_features(rows):
     # target: did this team finish in top half?
     df['target'] = (df['position'] <= (df.shape[0] // 2)).astype(int)
     y = df['target']
+
     return X, y
+
 
 def train_model():
     # Train on the most recent completed season only
     current_year = datetime.now().year
-    # football-data season parameter: use previous calendar year (e.g., 2024 for 2024/25 season)
+    # season param: use previous calendar year (e.g., 2024 for 2024/25)
     season = current_year - 1
     print(f"🔍 Fetching data for season {season}...")
     rows = fetch_all_data([season])
@@ -40,11 +43,13 @@ def train_model():
     joblib.dump(model, path)
     print(f"💾 Model saved to {path}")
 
+
 def load_latest_model():
     files = sorted(os.listdir(MODEL_DIR))
     if not files:
         raise FileNotFoundError("No model files found. Train first.")
     return joblib.load(os.path.join(MODEL_DIR, files[-1]))
+
 
 def predict(limit=10):
     """
@@ -63,4 +68,3 @@ def predict(limit=10):
         comp_name = COMPETITIONS.get(m["competition"], m["competition"])
         print(f"{date_str} — {comp_name}: {m['home']} vs {m['away']}")
     print()
-

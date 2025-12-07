@@ -51,7 +51,7 @@ def build_features(matches: list) -> pd.DataFrame:
 
         if label is not None:
             recent[home_id].append(label)
-            # Invert outcome for away team: home win(0)->away loss(2), draw(1)->draw(1), away win(2)->away win(0)
+            # Invert outcome for away team (2 - label)
             recent[away_id].append(2 - label)
 
     return pd.DataFrame(records)

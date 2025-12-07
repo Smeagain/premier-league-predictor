@@ -1,6 +1,7 @@
 import requests
 from config import HEADERS, COMPETITIONS
 
+
 def fetch_standings(comp_code, season):
     """
     Fetch standings for a given competition code and season.
@@ -37,7 +38,9 @@ def fetch_all_data(seasons):
                 row['competition'] = code
                 row['season'] = season
                 all_rows.append(row)
+
     return all_rows
+
 
 def fetch_upcoming_fixtures(limit=10):
     """
@@ -52,7 +55,7 @@ def fetch_upcoming_fixtures(limit=10):
         )
         res = requests.get(url, headers=HEADERS, timeout=15)
         if res.status_code != 200:
-            print(f"⚠️ Unable to fetch fixtures for {comp_code}: HTTP {res.status_code}")
+            print(f"⚠️ Unable to fetch fixtures for {comp_code}: {res.status_code}")
             continue
         data = res.json()
         for m in data.get("matches", []):
@@ -66,4 +69,3 @@ def fetch_upcoming_fixtures(limit=10):
     # sort by date ascending
     fixtures.sort(key=lambda x: x["date"])
     return fixtures[:limit]
-
