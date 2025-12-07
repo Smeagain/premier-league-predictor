@@ -42,7 +42,7 @@ jobs:
       - name: Lint with flake8
         run: |
           echo "Running flake8..."
-          flake8 || true
+          flake8
 
       - name: Run unit tests
         run: |
