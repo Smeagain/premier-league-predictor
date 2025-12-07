@@ -1,4 +1,3 @@
-from datetime import datetime
 import pandas as pd
 from collections import deque
 from config import RECENT_FORM_N
