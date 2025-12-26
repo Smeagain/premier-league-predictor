@@ -2,3 +2,6 @@
 # Virtual environments
 venv/
 .venv/
+
+# Data files
+/data/
