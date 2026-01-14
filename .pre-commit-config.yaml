@@ -6,7 +6,8 @@ repos:
       - id: trailing-whitespace
       - id: check-yaml
 
-  - repo: https://github.com/pre-commit/mirrors-flake8
-    rev: v6.1.0
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.15
     hooks:
-      - id: flake8
+      - id: ruff
+        args: ["--fix"]

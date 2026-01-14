@@ -18,3 +18,6 @@ COMPETITIONS = {
 
 MODEL_DIR = "models"
 MODEL_NAME_TEMPLATE = "model_{timestamp}.pkl"
+
+# number of recent matches to consider for form features
+RECENT_FORM_N = 5

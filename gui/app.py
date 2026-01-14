@@ -20,7 +20,7 @@ class App(tk.Tk):
 
         self.train_btn = tk.Button(self, text="Train Model", command=self._start_train)
         self.train_btn.grid(row=1, column=0, padx=5, pady=5)
-        self.progress = ttk.Progressbar(self, mode='indeterminate')
+        self.progress = ttk.Progressbar(self, mode="indeterminate")
         self.progress.grid(row=1, column=1, padx=5)
 
         self.predict_btn = tk.Button(self, text="Predict", command=self._do_predict)
@@ -42,6 +42,7 @@ class App(tk.Tk):
                 messagebox.showerror("Error", str(e))
             finally:
                 self.progress.stop()
+
         threading.Thread(target=task).start()
 
     def _do_predict(self):
@@ -50,7 +51,7 @@ class App(tk.Tk):
         except ValueError:
             messagebox.showerror("Error", "Invalid limit")
             return
-        self.output.delete('1.0', tk.END)
+        self.output.delete("1.0", tk.END)
         results = predict(limit=limit)
         for r in results:
             line = (

@@ -1,4 +1,38 @@
+# --- Python bytecode / caches ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
 
-# Virtual environments
-venv/
+# --- Virtual environments ---
 .venv/
+venv/
+ENV/
+env/
+
+# --- Test / tooling caches ---
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+*.log
+
+# --- OS / editor junk ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# --- Project runtime artifacts ---
+cache/
+data/*.parquet
+data/*.pq
+
+# --- Trained models / outputs ---
+models/*.pkl
+score_models/*.pkl
+
+# --- Optional: local env secrets ---
+.env
