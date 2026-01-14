@@ -37,6 +37,18 @@ def calculate_elo_ratings(matches_df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         DataFrame with two new columns: 'home_elo' and 'away_elo'.
     """
+    df = matches_df.copy()
+
+    # Ensure date is datetime for sorting (tests might already pass tz-aware)
+    df["date"] = pd.to_datetime(df["date"], errors="coerce", utc=True)
+
+    # If season isn't present, treat all matches as one stream ordered by date
+    if "season" not in df.columns:
+        df["season"] = "unknown"
+
+    # From here on, use the cleaned copy consistently
+    matches_df = df
+
     print("Calculating Elo ratings...")
 
     # Ensure dataframe is sorted by date
@@ -47,7 +59,7 @@ def calculate_elo_ratings(matches_df: pd.DataFrame) -> pd.DataFrame:
     away_elos = []
 
     # Iterate over each match to calculate and update Elo ratings
-    for index, row in matches_df.iterrows():
+    for _, row in matches_df.iterrows():
         home_team = row["home_team"]
         away_team = row["away_team"]
 

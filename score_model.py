@@ -236,18 +236,13 @@ def predict_score(score_model_data, match_features_df):
         ).fillna(0)
 
     # Prepare exog for home model prediction
-    # Ensure the order of columns matches the model's exog_names
-    X_predict_home = (
-        prediction_exog_template[home_model.exog_names[1:]].astype(float).to_numpy()
-    )  # Exclude constant
-    X_predict_home = sm.add_constant(X_predict_home, prepend=False)
+    X_predict_home = prediction_exog_template[base_feature_cols].astype(float).to_numpy()
+    X_predict_home = sm.add_constant(X_predict_home, prepend=False, has_constant="add")
 
     # Prepare exog for away model prediction
-    # Ensure the order of columns matches the model's exog_names
-    X_predict_away = (
-        prediction_exog_template[away_model.exog_names[1:]].astype(float).to_numpy()
-    )  # Exclude constant
-    X_predict_away = sm.add_constant(X_predict_away, prepend=False)
+    X_predict_away = prediction_exog_template[base_feature_cols].astype(float).to_numpy()
+    X_predict_away = sm.add_constant(X_predict_away, prepend=False, has_constant="add")
+
 
     try:
         # Predict the expected number of home goals (lambda_home)
@@ -278,13 +273,19 @@ def predict_score(score_model_data, match_features_df):
                 j, lambda_away
             )
 
-    # Find the indices of the maximum probability
-    predicted_home_goals, predicted_away_goals = np.unravel_index(
-        prob_matrix.argmax(), prob_matrix.shape
-    )
+    # Find top 3 scorelines (most probable exact scores)
+    flat = prob_matrix.flatten()
+    top_idx = flat.argsort()[-3:][::-1]  # indices of top 3 probs, descending
 
-    return f"{predicted_home_goals}-{predicted_away_goals}"
+    top_scores = []
+    for k in top_idx:
+        i, j = np.unravel_index(k, prob_matrix.shape)
+        top_scores.append((i, j, float(prob_matrix[i, j])))
 
+    best_i, best_j, _ = top_scores[0]
 
+    # Include expected goals and top scorelines
+    top_str = ", ".join([f"{i}-{j} ({p:.2%})" for i, j, p in top_scores])
+    return f"{best_i}-{best_j} | xG {lambda_home:.2f}-{lambda_away:.2f} | top: {top_str}"
 if __name__ == "__main__":
     train_score_model()

@@ -2,6 +2,15 @@ import pandas as pd
 from config import RECENT_FORM_N
 from elo import calculate_elo_ratings
 
+# Known Premier League teams by season are inferred by match count:
+# PL has 380 matches per season, Championship has 552
+
+
+def infer_is_championship(df: pd.DataFrame) -> pd.Series:
+    # Championship seasons have >380 matches
+    season_counts = df.groupby("season")["home_team"].transform("count")
+    return season_counts > 380
+
 
 def build_features(
     data_path="data/master_dataset.parquet", df=None, drop_na_labels=True
@@ -33,6 +42,11 @@ def build_features(
     else:
         # If df is provided, ensure it's a copy to avoid modifying original
         df = df.copy()
+
+    if "season" in df.columns:
+        df["is_championship"] = infer_is_championship(df).astype(int)
+    else:
+        df["is_championship"] = 0
 
     # 1. Calculate Elo ratings
     df = calculate_elo_ratings(df)
@@ -93,7 +107,7 @@ def build_features(
     # We now have rolling stats for each team for each match.
     # We need to merge them back into the original match-centric format.
     features_df = df[
-        ["date", "home_team", "away_team", "fthg", "ftag", "ftr", "elo_diff"]
+        ["date", "home_team", "away_team", "ftr", "elo_diff", "is_championship"]
     ].copy()
 
     # Get home team features
@@ -163,19 +177,6 @@ def build_features(
         features_df = features_df.dropna(subset=["label"])
 
     print(
-        f"✓ Feature engineering complete. Final feature matrix shape: {features_df.shape}"
-    )
+        f"✓ Feature engineering complete. Final feature matrix shape: {
+            features_df.shape}")
     return features_df
-
-
-if __name__ == "__main__":
-    # Example usage:
-    # Demonstrates how to build the feature matrix and shows the result.
-    feature_matrix = build_features()
-    if not feature_matrix.empty:
-        print("\n--- Feature Matrix ---")
-        print(f"Shape: {feature_matrix.shape}")
-        print("\nColumns:")
-        print(feature_matrix.columns)
-        print("\nLast 5 rows:")
-        print(feature_matrix.tail())
